@@ -25,7 +25,9 @@ services:
       - --entrypoints.websecure.http.tls.certResolver=letsencrypt
       - --entrypoints.websecure.http.tls.domains[0].main=daphnis.xyz
     environment:
-      - CF_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
+      # - CF_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
+      - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
+      - CF_ZONE_API_TOKEN=${CLOUDFLARE_ZONE_API_TOKEN}
     ports:
       - "80:80"
       - "443:443"
