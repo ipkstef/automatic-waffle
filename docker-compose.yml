@@ -26,9 +26,9 @@ services:
       - --entrypoints.websecure.http.tls.domains[0].main=home.example.com
       - --entrypoints.websecure.http.tls.domains[0].sans=*.home.example.com
     environment:
-      - CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
-      - CLOUDFLARE_ZONE_API_TOKEN=${CLOUDFLARE_ZONE_API_TOKEN}
-      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      # - CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
+      # - CLOUDFLARE_ZONE_API_TOKEN=${CLOUDFLARE_ZONE_API_TOKEN}
+      # - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
       - CF_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
     ports:
       - "80:80"
