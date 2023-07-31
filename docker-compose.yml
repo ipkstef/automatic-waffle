@@ -12,7 +12,7 @@ services:
       - --api.dashboard=true
       # Set up LetsEncrypt
       - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
-      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=letsencrypt-dns-cloudflare
       - --certificatesresolvers.letsencrypt.acme.email=daphnisxyz@proton.me
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
       # Set up an insecure listener that redirects all traffic to TLS
