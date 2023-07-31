@@ -8,6 +8,7 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./.htpasswd:/etc/nginx/.htpasswd:ro
 
   whoami:
     image: jwilder/whoami
