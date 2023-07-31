@@ -13,5 +13,5 @@ services:
     image: jwilder/whoami
     environment:
       - VIRTUAL_HOST=whoami.${ROOT_DOMAIN}
-      - VIRTUAL_PROTO=https
-      - VIRTUAL_PORT=443
+      # - VIRTUAL_PROTO=https
+      # - VIRTUAL_PORT=443
