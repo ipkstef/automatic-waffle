@@ -10,17 +10,11 @@ services:
       - --providers.docker=true
       # Enable the Trafik dashboard
       - --api.dashboard=true
-      # Declare our certificate resolver for letsencrypt
-      - '--certificatesresolvers.letsencrypt.acme.email=test@traefik.io'
-      - '--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json'
-      - '--certificatesresolvers.letsencrypt.acme.dnschallenge=true'
-      - '--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare'
-      - '--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=0'
-      # Request a wildcard certificate so that we can handle accesses to nonexistant subdomains.
-      # Use letsencrypt as the default cert resolver for all websecure entries.
-      - '--entrypoints.websecure.http.tls.certresolver=letsencrypt'
-      - '--entrypoints.websecure.http.tls.domains[0].main=${ROOT_DOMAIN}'
-      - '--entrypoints.websecure.http.tls.domains[0].sans=*.${ROOT_DOMAIN}'
+      # Set up LetsEncrypt
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.letsencrypt.acme.email=daphnisxyz@proton.me
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
       # Set up an insecure listener that redirects all traffic to TLS
       - --entrypoints.web.address=:80
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
@@ -43,6 +37,7 @@ services:
       - "traefik.enable=true"
       - 'traefik.http.routers.traefik.rule=Host(`traefik.${ROOT_DOMAIN}`)'
       - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
       - "traefik.http.routers.traefik.service=api@internal"
       - 'traefik.http.routers.traefik.middlewares=strip'
       - 'traefik.http.middlewares.strip.stripprefix.prefixes=/traefik'
@@ -62,7 +57,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`whoami.${ROOT_DOMAIN}`)"
       - "traefik.http.routers.whoami.entrypoints=websecure"
-
+      - "traefik.http.routers.whoami.tls.certresolver=letsencrypt"
     networks:
       - default
 
