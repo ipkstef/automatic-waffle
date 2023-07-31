@@ -23,7 +23,7 @@ services:
       # Set up the TLS configuration for our websecure listener
       - --entrypoints.websecure.http.tls=true
       - --entrypoints.websecure.http.tls.certResolver=letsencrypt
-      - --entrypoints.websecure.http.tls.domains[0].main=daphnis.xyz
+      - --entrypoints.websecure.http.tls.domains[0].main=${ROOT_DOMAIN}
     environment:
       # - CF_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
       - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
@@ -36,7 +36,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     labels:
       - "traefik.enable=true"
-      - 'traefik.http.routers.traefik.rule=Host(`traefik.daphnis.xyz`)'
+      - 'traefik.http.routers.traefik.rule=Host(`traefik.${ROOT_DOMAIN}`)'
       - "traefik.http.routers.traefik.entrypoints=websecure"
       - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
       - "traefik.http.routers.traefik.service=api@internal"
@@ -56,7 +56,7 @@ services:
     container_name: "whoami"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.daphnis.xyz`)"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.${ROOT_DOMAIN}`)"
       - "traefik.http.routers.whoami.entrypoints=websecure"
       - "traefik.http.routers.whoami.tls.certresolver=letsencrypt"
     networks:
