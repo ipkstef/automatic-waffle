@@ -25,7 +25,7 @@ services:
       - --entrypoints.websecure.http.tls.certResolver=letsencrypt
       - --entrypoints.websecure.http.tls.domains[0].main=${ROOT_DOMAIN}
     environment:
-      - CLOUDFLARE_API_KEY =${CLOUDFLARE_DNS_API_TOKEN}
+      - CLOUDFLARE_API_KEY=${CLOUDFLARE_DNS_API_TOKEN}
       - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
       - CF_ZONE_API_TOKEN=${CLOUDFLARE_ZONE_API_TOKEN}
       - CLOUDFLARE_ZONE_API_TOKEN=${CF_ZONE_API_TOKEN}
