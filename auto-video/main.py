@@ -1,15 +1,15 @@
-import ffmpeg
 import csv
 import random
 import os
-import openai
 import json
+import openai
+import ffmpeg
 
-# import google_auth_oauthlib.flow
-# import googleapiclient.discovery
-# import googleapiclient.errors
+import google_auth_oauthlib.flow
+import googleapiclient.discovery
+import googleapiclient.errors
 
-# from googleapiclient.http import MediaFileUpload
+from googleapiclient.http import MediaFileUpload
 
 
 
@@ -17,6 +17,17 @@ import json
 csv_file = "auto-video/quotes.csv"
 start_row = 1
 video_id = random.randint(1000, 9999)
+
+CLIENT_ID = os.environ.get("CLIENT_ID")
+CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
+
+_data = {"web":{"client_id":CLIENT_ID,"project_id":"essential-rider-383902","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":CLIENT_SECRET}}
+
+
+with open('auto-video/client_secret.json', 'w') as outfile:
+    json.dump(_data, outfile)
+
+
 
 def generate_random_quote(csv_file, start_row):
     with open(csv_file, 'r', encoding='utf-8') as file:
@@ -82,7 +93,7 @@ def wrapped_text(text, max_line_length=30):
     return "\n\n".join(lines)
 
 def generate_openai_description(title):
-    openai.api_key = "xxxxx"
+    openai.api_key = os.environ.get("OPENAI_KEY")
     prompt = f"Give me a catch close to click bait title and description for a youtube video about this quote: {title} \n \n Only respond with the title and description in json format"
     response = openai.Completion.create(
         engine="text-davinci-003",
@@ -110,7 +121,7 @@ def upload_to_youtube(title, description, file):
 
     api_service_name = "youtube"
     api_version = "v3"
-    client_secrets_file = "YOUR_CLIENT_SECRET_FILE.json"
+    client_secrets_file = 'auto-video/client_secret.json'
 
     # Get credentials and create an API client
     flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
@@ -153,13 +164,13 @@ if __name__ == "__main__":
     output_video_path = f"auto-video/output/output{video_id}.mp4"
     input_video_path = get_random_mp4_file(video_folder_path)
     input_audio_path = get_random_mp3_file(video_folder_path)
-    generated_info = generate_openai_description(quote)
 
 
     try:
         overlay_text_on_video(input_video_path, output_video_path,input_audio_path, text=wrapped_quote)
         print("Overlay complete.")
         print("Quote: ", quote)
+        generated_info = generate_openai_description(quote)
         print(generated_info['title'])
         print(generated_info['description'])
     
@@ -171,11 +182,13 @@ if __name__ == "__main__":
         print("Video created successfully.")
         print("Uploading to YouTube...")
         try:
-            upload_to_youtube(title=generated_info['title'], description=generated_info['description'], file=output_video_path)
-            print("Upload complete.")
+            pass
+            # upload_to_youtube(title=generated_info['title'], description=generated_info['description'], file=output_video_path)
+            # print("Upload complete.")
         except Exception as e:
             print(e)
             print("Error occurred while uploading video to YouTube.")
+            os.remove('temp_video.mp4')
         else:
             print("Video uploaded successfully.")
             os.remove('temp_video.mp4')

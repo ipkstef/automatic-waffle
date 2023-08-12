@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-
+    environment: auto-video
     runs-on: ubuntu-latest
 
     steps:
@@ -23,8 +23,10 @@ jobs:
         python-version: "3.10"
     - name: Install dependencies
       run: |
+        sudo apt update
+        sudo apt install ffmpeg
         python -m pip install --upgrade pip
-        pip install flake8 pytest
+        pip install flake8 
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
@@ -33,5 +35,10 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Generate Video
+    - env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_KEY }}
+        CLIENT_ID: ${{secrets.CLIENT_ID}}
+        CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
+        
       run: |
         python auto-video/main.py
