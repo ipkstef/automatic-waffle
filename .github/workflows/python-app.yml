@@ -4,8 +4,8 @@
 name: Python application
 
 on:
-  cron:
-    - cron: '0 9,20 * * *'
+  schedule:
+    - cron: "0 9,20 * * *"
 
 permissions:
   contents: write
