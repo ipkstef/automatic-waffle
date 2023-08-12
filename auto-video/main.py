@@ -95,6 +95,9 @@ def generate_openai_description(title):
         "description": generated_description["description"]
     }
 
+def upload_to_youtube():
+    pass
+
     
         
 
@@ -109,17 +112,17 @@ if __name__ == "__main__":
     generated_info = generate_openai_description(quote)
     print(generated_info['title'])
 
-    # try:
-    #     overlay_text_on_video(input_video_path, output_video_path,input_audio_path, text=wrapped_quote)
-    #     print("Overlay complete.")
-    #     print(quote)
-    #     exit(0)
-    # except Exception as e:
-    #     print(e)
-    #     print("Error occurred while overlaying text on video.")
-    #     os.remove('temp_video.mp4')
-    # else:
-    #     print("No MP4 files found in the folder.")
+    try:
+        overlay_text_on_video(input_video_path, output_video_path,input_audio_path, text=wrapped_quote)
+        print("Overlay complete.")
+        print(quote)
+        exit(0)
+    except Exception as e:
+        print(e)
+        print("Error occurred while overlaying text on video.")
+        os.remove('temp_video.mp4')
+    else:
+        print("No MP4 files found in the folder.")
 
 
 
