@@ -43,25 +43,43 @@ def get_random_mp4_file(folder_path):
     return os.path.join(folder_path, random.choice(mp4_files))
 
 def overlay_text_on_video(input_video_path, output_video_path, text):
-
     (
         ffmpeg
         .input(input_video_path)
-        .filter('drawtext', text=text, fontsize=24, fontcolor='white', x='(w-text_w)/2', y='(h-text_h)/2', box=1, boxcolor='black@0.5', boxborderw=5)
-        .output(output_video_path, vcodec='libx264', crf=20, preset='slower', movflags='faststart', pix_fmt='yuv420p')
+        .filter('drawtext', text=text, fontsize=40, fontcolor='white', x='(w-text_w)/2', y='(h-text_h)/2', boxborderw=5, font='Aharoni-Bold')
+        # .output(output_video_path, vcodec='libx264', crf=20, preset='faster', movflags='faststart')
+        .output(output_video_path, vcodec='libx264', acodec='copy', crf=20, preset='faster', movflags='faststart')
         .run()
     )
 
+def wrapped_text(text, max_line_length=30):
+    words = text.split()
+    lines = []
+    current_line = words[0]
+    for word in words[1:]:
+        if len(current_line) + len(word) + 1 <= max_line_length:
+            current_line += " " + word
+        else:
+            lines.append(current_line)
+            current_line = word
+    lines.append(current_line)
+    return "\n\n".join(lines)
+
 if __name__ == "__main__":
     quote = generate_random_quote(csv_file, start_row)
+    wrapped_quote = wrapped_text(quote)
     print(quote)
     video_folder_path = "auto-video/input"
     output_video_path = f"auto-video/output/output{video_id}.mp4"
     print(f"Output video path: {output_video_path}")
     input_video_path = get_random_mp4_file(video_folder_path)
     if input_video_path:
-        overlay_text_on_video(input_video_path, output_video_path, text=quote)
-        print("Overlay complete.")
+        try:
+            overlay_text_on_video(input_video_path, output_video_path, text=wrapped_quote)
+            print("Overlay complete.")
+        except Exception as e:
+            print(f"Error: {e}")
+            
     else:
         print("No MP4 files found in the folder.")
 
