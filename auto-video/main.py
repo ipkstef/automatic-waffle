@@ -5,6 +5,13 @@ import os
 import openai
 import json
 
+# import google_auth_oauthlib.flow
+# import googleapiclient.discovery
+# import googleapiclient.errors
+
+# from googleapiclient.http import MediaFileUpload
+
+
 
 
 csv_file = "auto-video/quotes.csv"
@@ -57,7 +64,7 @@ def overlay_text_on_video(input_video_path, output_video_path,input_audio_path, 
         .output(ffmpeg.input('temp_video.mp4'), ffmpeg.input(input_audio_path), output_video_path, shortest=None,vcodec='libx264', crf=20, preset='faster', movflags='faststart', pix_fmt='yuv420p')
         .run()
     )
-    os.remove('temp_video.mp4')
+    # os.remove('temp_video.mp4')
     
 
 
@@ -75,7 +82,7 @@ def wrapped_text(text, max_line_length=30):
     return "\n\n".join(lines)
 
 def generate_openai_description(title):
-    openai.api_key = "xxxxxxx"
+    openai.api_key = "xxxxx"
     prompt = f"Give me a catch close to click bait title and description for a youtube video about this quote: {title} \n \n Only respond with the title and description in json format"
     response = openai.Completion.create(
         engine="text-davinci-003",
@@ -86,17 +93,54 @@ def generate_openai_description(title):
         frequency_penalty=0.5,
         presence_penalty=0.5,
     )
-    # generated_description = response.choices[0].text
-    #convert to json
     generated_description = json.loads(response.choices[0].text)
-    # print(f"generated description: {generated_description}")
     return {
         "title": generated_description["title"],
         "description": generated_description["description"]
     }
 
-def upload_to_youtube():
-    pass
+def upload_to_youtube(title, description, file):
+
+    scopes = ["https://www.googleapis.com/auth/youtube.upload"]
+
+
+    # Disable OAuthlib's HTTPS verification when running locally.
+    # *DO NOT* leave this option enabled in production.
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+    api_service_name = "youtube"
+    api_version = "v3"
+    client_secrets_file = "YOUR_CLIENT_SECRET_FILE.json"
+
+    # Get credentials and create an API client
+    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+        client_secrets_file, scopes)
+    credentials = flow.run_console()
+    youtube = googleapiclient.discovery.build(
+        api_service_name, api_version, credentials=credentials)
+
+    request = youtube.videos().insert(
+        part="snippet,status",
+        body={
+          "snippet": {
+            "categoryId": "37",
+            "description": description,
+            "title": title,
+            "channelId": "UC_7huW78i_4c723OTYFi_CQ"
+          },
+          "status": {
+            "privacyStatus": "public",
+            "madeForKids": False
+          }
+        },
+        
+        # TODO: For this request to work, you must replace "YOUR_FILE"
+        #       with a pointer to the actual file you are uploading.
+        media_body=MediaFileUpload(file)
+    )
+    response = request.execute()
+
+    print(response)
 
     
         
@@ -110,19 +154,33 @@ if __name__ == "__main__":
     input_video_path = get_random_mp4_file(video_folder_path)
     input_audio_path = get_random_mp3_file(video_folder_path)
     generated_info = generate_openai_description(quote)
-    print(generated_info['title'])
+
 
     try:
         overlay_text_on_video(input_video_path, output_video_path,input_audio_path, text=wrapped_quote)
         print("Overlay complete.")
-        print(quote)
-        exit(0)
+        print("Quote: ", quote)
+        print(generated_info['title'])
+        print(generated_info['description'])
+    
     except Exception as e:
         print(e)
         print("Error occurred while overlaying text on video.")
         os.remove('temp_video.mp4')
     else:
-        print("No MP4 files found in the folder.")
-
+        print("Video created successfully.")
+        print("Uploading to YouTube...")
+        try:
+            upload_to_youtube(title=generated_info['title'], description=generated_info['description'], file=output_video_path)
+            print("Upload complete.")
+        except Exception as e:
+            print(e)
+            print("Error occurred while uploading video to YouTube.")
+        else:
+            print("Video uploaded successfully.")
+            os.remove('temp_video.mp4')
+            os.remove(output_video_path)
+            print("Files removed.")
+            
 
 
