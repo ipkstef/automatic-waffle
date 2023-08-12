@@ -1,4 +1,4 @@
 .env
 letsencrypt
 certs
-output/*.mp4
+auto-video/output/*.mp4

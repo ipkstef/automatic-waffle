@@ -2,17 +2,14 @@ import ffmpeg
 import csv
 import random
 import os
+import openai
+import json
 
 
 
 csv_file = "auto-video/quotes.csv"
 start_row = 1
-
-#function taht genrates random 4 digits
-def generate_random_digits():
-    return random.randint(1000, 9999)
-
-video_id = generate_random_digits()
+video_id = random.randint(1000, 9999)
 
 def generate_random_quote(csv_file, start_row):
     with open(csv_file, 'r', encoding='utf-8') as file:
@@ -77,26 +74,52 @@ def wrapped_text(text, max_line_length=30):
     lines.append(current_line)
     return "\n\n".join(lines)
 
+def generate_openai_description(title):
+    openai.api_key = "xxxxxxx"
+    prompt = f"Give me a catch close to click bait title and description for a youtube video about this quote: {title} \n \n Only respond with the title and description in json format"
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        temperature=0.7,
+        max_tokens=150,
+        top_p=1,
+        frequency_penalty=0.5,
+        presence_penalty=0.5,
+    )
+    # generated_description = response.choices[0].text
+    #convert to json
+    generated_description = json.loads(response.choices[0].text)
+    # print(f"generated description: {generated_description}")
+    return {
+        "title": generated_description["title"],
+        "description": generated_description["description"]
+    }
+
+    
+        
+
 if __name__ == "__main__":
 
     quote = generate_random_quote(csv_file, start_row)
     wrapped_quote = wrapped_text(quote)
-    print(quote)
     video_folder_path = "auto-video/input"
     output_video_path = f"auto-video/output/output{video_id}.mp4"
     input_video_path = get_random_mp4_file(video_folder_path)
     input_audio_path = get_random_mp3_file(video_folder_path)
+    generated_info = generate_openai_description(quote)
+    print(generated_info['title'])
 
-    try:
-        overlay_text_on_video(input_video_path, output_video_path,input_audio_path, text=wrapped_quote)
-        print("Overlay complete.")
-        exit(0)
-    except Exception as e:
-        print(e)
-        print("Error occurred while overlaying text on video.")
-        os.remove('temp_video.mp4')
-    else:
-        print("No MP4 files found in the folder.")
+    # try:
+    #     overlay_text_on_video(input_video_path, output_video_path,input_audio_path, text=wrapped_quote)
+    #     print("Overlay complete.")
+    #     print(quote)
+    #     exit(0)
+    # except Exception as e:
+    #     print(e)
+    #     print("Error occurred while overlaying text on video.")
+    #     os.remove('temp_video.mp4')
+    # else:
+    #     print("No MP4 files found in the folder.")
 
 
 
